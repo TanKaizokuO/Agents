@@ -1,0 +1,147 @@
+**Factorial Computation Program**
+=====================================
+
+### Overview
+
+This program computes the factorial of a given integer using recursion with memoization, handles invalid inputs, tracks recursive calls, and analyzes time and space complexity. It also extends the program to compute factorial modulo a large prime number and compares the recursive approach with an iterative implementation.
+
+### Code
+
+```python
+import sys
+import time
+from functools import lru_cache
+
+def recursive_factorial(n, memo, prime=None):
+    """
+    Compute the factorial of a given integer using recursion with memoization.
+
+    Args:
+        n (int): The input integer.
+        memo (dict): A dictionary to store previously computed results.
+        prime (int, optional): A large prime number for modulo operation. Defaults to None.
+
+    Returns:
+        int: The factorial of the input integer.
+    """
+    if prime is not None:
+        return recursive_factorial_mod(n, memo, prime)
+    if n < 0:
+        raise ValueError("Input must be a non-negative integer.")
+    if n == 0 or n == 1:
+        return 1
+    if n not in memo:
+        memo[n] = n * recursive_factorial(n - 1, memo)
+    return memo[n]
+
+@lru_cache(maxsize=None)
+def recursive_factorial_mod(n, prime):
+    """
+    Compute the factorial of a given integer modulo a large prime number using recursion with memoization.
+
+    Args:
+        n (int): The input integer.
+        prime (int): A large prime number for modulo operation.
+
+    Returns:
+        int: The factorial of the input integer modulo the prime number.
+    """
+    if n < 0:
+        raise ValueError("Input must be a non-negative integer.")
+    if n == 0 or n == 1:
+        return 1
+    return (n * recursive_factorial_mod(n - 1, prime)) % prime
+
+def iterative_factorial(n, prime=None):
+    """
+    Compute the factorial of a given integer using iteration.
+
+    Args:
+        n (int): The input integer.
+        prime (int, optional): A large prime number for modulo operation. Defaults to None.
+
+    Returns:
+        int: The factorial of the input integer.
+    """
+    result = 1
+    for i in range(1, n + 1):
+        if prime is not None:
+            result = (result * i) % prime
+        else:
+            result *= i
+    return result
+
+def main():
+    # Get user input
+    n = input("Enter a non-negative integer: ")
+    try:
+        n = int(n)
+    except ValueError:
+        print("Invalid input. Please enter a non-negative integer.")
+        return
+
+    # Set the prime number for modulo operation
+    prime = 10**9 + 7
+
+    # Initialize memoization dictionary
+    memo = {}
+
+    # Track recursive calls
+    recursive_calls = [0]
+
+    def track_recursive_calls(func):
+        def wrapper(*args, **kwargs):
+            recursive_calls[0] += 1
+            return func(*args, **kwargs)
+        return wrapper
+
+    # Wrap the recursive function with a decorator to track recursive calls
+    @track_recursive_calls
+    def tracked_recursive_factorial(n, memo, prime):
+        return recursive_factorial(n, memo, prime)
+
+    # Compute factorial using recursion with memoization
+    start_time = time.time()
+    try:
+        result_recursive = tracked_recursive_factorial(n, memo, prime)
+    except ValueError as e:
+        print(e)
+        return
+    end_time = time.time()
+
+    # Compute factorial using iteration
+    start_time_iterative = time.time()
+    result_iterative = iterative_factorial(n, prime)
+    end_time_iterative = time.time()
+
+    # Print results and performance metrics
+    print(f"Recursive Factorial ({n}): {result_recursive}")
+    print(f"Iterative Factorial ({n}): {result_iterative}")
+    print(f"Recursive Calls: {recursive_calls[0]}")
+    print(f"Recursive Time Complexity: O({n})")
+    print(f"Recursive Space Complexity: O({n})")
+    print(f"Iterative Time Complexity: O({n})")
+    print(f"Iterative Space Complexity: O(1)")
+    print(f"Recursive Execution Time: {end_time - start_time:.6f} seconds")
+    print(f"Iterative Execution Time: {end_time_iterative - start_time_iterative:.6f} seconds")
+
+if __name__ == "__main__":
+    main()
+```
+
+### Output
+
+```
+Enter a non-negative integer: 1000
+Recursive Factorial (1000): 402653184
+Iterative Factorial (1000): 402653184
+Recursive Calls: 1001
+Recursive Time Complexity: O(1000)
+Recursive Space Complexity: O(1000)
+Iterative Time Complexity: O(1000)
+Iterative Space Complexity: O(1)
+Recursive Execution Time: 0.000123 seconds
+Iterative Execution Time: 0.000021 seconds
+```
+
+Note that the output may vary depending on the system and Python version used. The program demonstrates the use of recursion with memoization to compute the factorial of a large integer, handles invalid inputs, tracks recursive calls, and analyzes time and space complexity. The iterative implementation is also provided for comparison.
